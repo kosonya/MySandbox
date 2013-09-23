@@ -1,9 +1,11 @@
 package edu.cmu.west.mysandbox;
 
+import java.util.ArrayList;
+
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
-//import com.google.gson.Gson;
+import com.google.gson.Gson;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
@@ -16,7 +18,11 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         hellotext = (TextView)findViewById(R.id.hellotext);
-        hellotext.setText("Ololo");
+        Gson gson = new Gson();
+        ArrayList<Integer> ints = new ArrayList<Integer>();
+        ints.add(10); ints.add(100); ints.add(42);
+        
+        hellotext.setText(gson.toJson(ints));
     }
 
 
