@@ -8,6 +8,10 @@ import android.content.Intent;
 import android.content.Context;
 import android.content.IntentFilter;
 import java.lang.Float;
+import android.hardware.SensorManager;
+import android.hardware.Sensor;
+import java.util.List;
+
 
 
 
@@ -17,6 +21,9 @@ public class MainActivity extends Activity {
 	Intent batteryStatus;
 	Context context;
 	IntentFilter ifilter;
+	SensorManager sensormanager;
+	List<Sensor> sensorlist;
+	String hellostring;
 
 
     @Override
@@ -27,11 +34,18 @@ public class MainActivity extends Activity {
         ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         context = getBaseContext();
         hellotext = (TextView)findViewById(R.id.hellotext);
+        sensormanager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        sensorlist = sensormanager.getSensorList(Sensor.TYPE_ALL);
         batteryStatus = context.registerReceiver(null, ifilter);
         int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
         float batteryPct = level / (float)scale;
-        hellotext.setText("Battery level: " + Float.toString(batteryPct));
+        hellostring = "Battery level: " + Float.toString(batteryPct);
+        for(Sensor sensor: sensorlist) {
+        	hellostring += "\n" + sensor.getName();
+        }
+        hellotext.setText(hellostring);
+        
     }
 
 }
