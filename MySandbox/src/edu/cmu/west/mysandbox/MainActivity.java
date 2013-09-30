@@ -11,6 +11,7 @@ import java.lang.Float;
 import android.hardware.SensorManager;
 import android.hardware.Sensor;
 import java.util.List;
+import android.os.AsyncTask;
 
 
 
@@ -23,7 +24,24 @@ public class MainActivity extends Activity {
 	IntentFilter ifilter;
 	SensorManager sensormanager;
 	List<Sensor> sensorlist;
-	String hellostring;
+	
+	protected class SensorReader extends AsyncTask<Object, Object, String> {
+		protected String doInBackground(Object... args) {
+			String result = "";
+	        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+	        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+	        float batteryPct = level / (float)scale;
+	        result = "Battery level: " + Float.toString(batteryPct);
+	        for(Sensor sensor: sensorlist) {
+	        	result += "\n" + sensor.toString();
+	        }
+			return result;
+		}
+		
+		protected void onPostExecute(String result) {
+			hellotext.setText(result);
+		}
+	}
 
 
     @Override
@@ -37,14 +55,8 @@ public class MainActivity extends Activity {
         sensormanager = (SensorManager)getSystemService(SENSOR_SERVICE);
         sensorlist = sensormanager.getSensorList(Sensor.TYPE_ALL);
         batteryStatus = context.registerReceiver(null, ifilter);
-        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-        float batteryPct = level / (float)scale;
-        hellostring = "Battery level: " + Float.toString(batteryPct);
-        for(Sensor sensor: sensorlist) {
-        	hellostring += "\n" + sensor.getName();
-        }
-        hellotext.setText(hellostring);
+        new SensorReader().execute();
+
         
     }
 
