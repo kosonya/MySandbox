@@ -27,7 +27,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 	IntentFilter ifilter;
 	SensorManager sensormanager;
 	List<Sensor> sensorlist;
-	Sensor humidity;
+	Sensor humidity, pressure;
+	int callcount;
+
 
 
 
@@ -40,14 +42,26 @@ public class MainActivity extends Activity implements SensorEventListener {
         context = getBaseContext();
         hellotext = (TextView)findViewById(R.id.hellotext);
         sensormanager = (SensorManager)getSystemService(SENSOR_SERVICE);
-        humidity = sensormanager.getDefaultSensor(Sensor.TYPE_PRESSURE);
+        pressure = sensormanager.getDefaultSensor(Sensor.TYPE_PRESSURE);
+        humidity = sensormanager.getDefaultSensor(Sensor.TYPE_RELATIVE_HUMIDITY);
         sensormanager.registerListener(this, humidity, SensorManager.SENSOR_DELAY_NORMAL);
+     //   sensormanager.registerListener(this, pressure, SensorManager.SENSOR_DELAY_NORMAL);
+        callcount = 0;
+
     }
  
     public void onSensorChanged(SensorEvent event) {
-    	String res = "";
+    	callcount += 1;
+    	String res = "callcount: " + Integer.toString(callcount);
+  /*  	if (res.length() > 1000)
+    	{
+    		res = "Oops!";
+    	}
+    	
+   */
+    	res += "sensor name: " + event.sensor.getName();
     	for(float val : event.values) {
-    		res += Float.toString(val) + "\n";
+    		res +=  Float.toString(val);
     	}
     	hellotext.setText(res);
     }
