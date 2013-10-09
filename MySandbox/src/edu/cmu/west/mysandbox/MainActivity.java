@@ -66,13 +66,44 @@ public class MainActivity extends Activity implements SensorEventListener {
 
     }
  
-    public void updateAllFields() {
+    public void updateAllGUIFields() {
     	if (pressurevals != null) {
 	    	String text = "Pressure: ";
 	    	for(Float val: pressurevals) {
 	    		text += Float.toString(val) + "; ";
 	    	}
 	    	pressureTV.setText(text);
+    	}
+    	if (humidityvals != null) {
+	    	String text = "Humidity: ";
+	    	for(Float val: humidityvals) {
+	    		text += Float.toString(val) + "; ";
+	    	}
+	    	humidityTV.setText(text);
+    	}
+
+    	if (accelerometervals != null) {
+	    	String text = "Accelerometer: ";
+	    	for(Float val: accelerometervals) {
+	    		text += Float.toString(val) + "; ";
+	    	}
+	    	accelerometerTV.setText(text);
+    	}
+ 
+    	if (temperaturevals != null) {
+	    	String text = "Temperature: ";
+	    	for(Float val: temperaturevals) {
+	    		text += Float.toString(val) + "; ";
+	    	}
+	    	temperatureTV.setText(text);
+    	}
+ 
+    	if (lightvals != null) {
+	    	String text = "Light: ";
+	    	for(Float val: lightvals) {
+	    		text += Float.toString(val) + "; ";
+	    	}
+	    	lightTV.setText(text);
     	}
     	
     }
@@ -86,43 +117,33 @@ public class MainActivity extends Activity implements SensorEventListener {
     		}
     	}
     	if (event.sensor.getType() == Sensor.TYPE_RELATIVE_HUMIDITY) {
-//    		humidityvals = new float[event.values.length];
-//    		System.arraycopy(event.values, 0, humidityvals, 0, event.values.length);
-    		String text = "Relative humidity: ";
+			humidityvals = new ArrayList<Float>();
     		for(float val: event.values) {
-    			text += Float.toString(val) + "; ";
-    		}
-    		humidityTV.setText(text);   		
-    		
+    			humidityvals.add(Float.valueOf(val));
+    		} 			
     	}
 
     	if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-    		String text = "Acceleration: ";
+			accelerometervals = new ArrayList<Float>();
     		for(float val: event.values) {
-    			text += Float.toString(val) + "; ";
-    		}
-    		accelerometerTV.setText(text);   		
-    		
+    			accelerometervals.add(Float.valueOf(val));
+    		}	
     	}
 
     	if (event.sensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE) {
-    		String text = "Temperature: ";
+			temperaturevals = new ArrayList<Float>();
     		for(float val: event.values) {
-    			text += Float.toString(val) + "; ";
+    			temperaturevals.add(Float.valueOf(val));
     		}
-    		temperatureTV.setText(text);   		
-    		
     	}
 
     	if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
-    		String text = "Light: ";
+			lightvals = new ArrayList<Float>();
     		for(float val: event.values) {
-    			text += Float.toString(val) + "; ";
+    			lightvals.add(Float.valueOf(val));
     		}
-    		lightTV.setText(text);   		
-    		
     	}
-		updateAllFields();
+		updateAllGUIFields();
  
     }
 
