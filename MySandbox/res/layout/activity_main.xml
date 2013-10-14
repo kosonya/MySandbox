@@ -74,6 +74,12 @@
             android:text="Update settings" />
         
         <TextView
+            android:id="@+id/callcountTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Here be call count" />
+        
+        <TextView
             android:id="@+id/pressureTV"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -104,6 +110,38 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Here be light:" />
+
+        <TextView
+            android:id="@+id/latitudeTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Here be latitude" />
+
+        <TextView
+            android:id="@+id/longitudeTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Here be longitude" />
+
+        <TextView
+            android:id="@+id/altitudeTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Here be altitude" />
+
+        <TextView
+            android:id="@+id/bearingTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Here be bearing" />
+
+        <TextView
+            android:id="@+id/accuracyTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Here be accuracy" />
+
+
 
     </LinearLayout>
 
