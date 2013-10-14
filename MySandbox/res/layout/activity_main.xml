@@ -80,6 +80,12 @@
             android:text="Here be call count" />
         
         <TextView
+            android:id="@+id/batteryTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Here be battery level" />
+        
+        <TextView
             android:id="@+id/pressureTV"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

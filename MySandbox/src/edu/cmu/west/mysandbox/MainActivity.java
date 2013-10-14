@@ -3,6 +3,7 @@ package edu.cmu.west.mysandbox;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.app.Activity;
 import android.widget.TextView;
@@ -26,10 +27,12 @@ import java.util.List;
 public class MainActivity extends Activity implements SensorEventListener {
 	
 	public TextView pressureTV, humidityTV, accelerometerTV, temperatureTV,
-					lightTV, longitudeTV, latitudeTV, altitudeTV, bearingTV, accuracyTV, callcountTV;
+					lightTV, longitudeTV, latitudeTV, altitudeTV, bearingTV, accuracyTV, callcountTV,
+					batteryTV;
 	Intent batteryStatus;
+	IntentFilter batteryintent;
+
 	Context context;
-	IntentFilter ifilter;
 	SensorManager sensormanager;
 	List<Sensor> sensorlist;
 	Sensor humidityS, pressureS, accelerometerS, temperatureS, lightS;
@@ -39,6 +42,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	LocationListener gpslistener;
 	Boolean gps_is_enabled;
 	LocationManager locman;
+	Integer batterylevel = -1;
 
 
 
@@ -48,7 +52,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        batteryintent = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         context = getBaseContext();
         pressureTV = (TextView)findViewById(R.id.pressureTV);
         humidityTV = (TextView)findViewById(R.id.humidityTV);
@@ -61,6 +65,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         bearingTV = (TextView)findViewById(R.id.bearingTV);
         accuracyTV = (TextView)findViewById(R.id.accuracyTV);
         callcountTV = (TextView)findViewById(R.id.callcountTV);
+        batteryTV = (TextView)findViewById(R.id.batteryTV);
 
         
         
@@ -79,6 +84,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         gpslistener = new MyGPSListener();
         locman = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locman.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, gpslistener);
+        batteryStatus = context.registerReceiver(null, batteryintent);
 
         callcount = BigInteger.valueOf(0);
 
@@ -87,6 +93,10 @@ public class MainActivity extends Activity implements SensorEventListener {
     public void updateAllGUIFields() {
     	
     	callcountTV.setText("Updates received: " + callcount.toString());
+    	
+    	if (batterylevel >= 0) {
+    		batteryTV.setText("Battery level: " + Integer.toString(batterylevel) + "%");
+    	}
     	
     	if (pressurevals != null) {
 	    	String text = "Pressure: ";
@@ -139,6 +149,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     
     public void onSensorChanged(SensorEvent event) {
     	callcount = callcount.add(BigInteger.valueOf(1));
+    	
     	if (event.sensor.getType() == Sensor.TYPE_PRESSURE) {
 			pressurevals = new ArrayList<Float>();
     		for(float val: event.values) {
@@ -172,7 +183,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     			lightvals.add(Float.valueOf(val));
     		}
     	}
-		updateAllGUIFields();
+    	onSomethingChanged();
  
     }
 
@@ -180,6 +191,23 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public void onSomethingChanged(){
+		getBatteryLevel();
+		
+		updateAllGUIFields();
+		
+	}
+	
+	public void getBatteryLevel() {
+		
+		int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+		int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+		float batteryPct = level / (float)scale;
+		
+		batterylevel = Integer.valueOf((int) (100*batteryPct));
 	}
 	
 	public class MyGPSListener implements LocationListener {
@@ -193,7 +221,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 			gpsvals.add(Double.valueOf(location.getAltitude()));			
 			gpsvals.add(Double.valueOf(location.getBearing()));
 			gpsvals.add(Double.valueOf(location.getAccuracy()));
-			updateAllGUIFields();
+			onSomethingChanged();
 		}
 
 		@Override
