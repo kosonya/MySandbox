@@ -6,6 +6,8 @@ import android.location.LocationManager;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.app.Activity;
+import android.telephony.CellInfo;
+import android.telephony.TelephonyManager;
 import android.widget.TextView;
 import android.content.Intent;
 import android.content.Context;
@@ -28,7 +30,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	
 	public TextView pressureTV, humidityTV, accelerometerTV, temperatureTV,
 					lightTV, longitudeTV, latitudeTV, altitudeTV, bearingTV, accuracyTV, callcountTV,
-					batteryTV;
+					batteryTV, cellcountTV;
 	Intent batteryStatus;
 	IntentFilter batteryintent;
 
@@ -43,7 +45,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	Boolean gps_is_enabled;
 	LocationManager locman;
 	Integer batterylevel = -1;
-
+	TelephonyManager telephonymanager;
+	List<CellInfo> cellinfo;
 
 
 
@@ -66,6 +69,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         accuracyTV = (TextView)findViewById(R.id.accuracyTV);
         callcountTV = (TextView)findViewById(R.id.callcountTV);
         batteryTV = (TextView)findViewById(R.id.batteryTV);
+        cellcountTV = (TextView)findViewById(R.id.cellcountTV);
 
         
         
@@ -85,6 +89,8 @@ public class MainActivity extends Activity implements SensorEventListener {
         locman = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locman.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, gpslistener);
         batteryStatus = context.registerReceiver(null, batteryintent);
+        
+        telephonymanager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
 
         callcount = BigInteger.valueOf(0);
 
@@ -144,6 +150,14 @@ public class MainActivity extends Activity implements SensorEventListener {
     		accuracyTV.setText("Accuracy: " + Double.toString(gpsvals.get(4)));
     	}
     	
+    	if (cellinfo != null) {
+    		String text = "";
+    		text += "Cell count: " + cellinfo.size();
+    		for (CellInfo cell: cellinfo) {
+    			text += "\n" + cell.toString();
+    		}
+    		cellcountTV.setText(text);
+    	}
     	
     }
     
@@ -195,9 +209,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 	
 	public void onSomethingChanged(){
 		getBatteryLevel();
-		
+		getNeighboringCellInfo();
 		updateAllGUIFields();
 		
+	}
+	
+	public void getNeighboringCellInfo() {
+		cellinfo = telephonymanager.getAllCellInfo();
 	}
 	
 	public void getBatteryLevel() {

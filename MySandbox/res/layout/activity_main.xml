@@ -8,6 +8,17 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
 
+            <ScrollView
+            android:id="@+id/scrollView1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical" >
+
+    
     <LinearLayout
         android:id="@+id/linearLayout1"
         android:layout_width="wrap_content"
@@ -147,8 +158,16 @@
             android:layout_height="wrap_content"
             android:text="Here be accuracy" />
 
+        <TextView
+            android:id="@+id/cellcountTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Here be cell count" />
 
+            </LinearLayout>
+        
+      </LinearLayout>
+        </ScrollView>
 
-    </LinearLayout>
 
 </RelativeLayout>
