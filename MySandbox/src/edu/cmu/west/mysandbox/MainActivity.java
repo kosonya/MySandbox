@@ -62,7 +62,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	WifiManager wifimanager;
 	List<ScanResult> wifipoints;
 	String location_id, device_id, server_uri;
-	int sent_count = 0;
+	int sent_count;
 
 
 
@@ -130,6 +130,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         updatesettingsB.setOnClickListener(new onReadSettingsClicked());
 
         callcount = BigInteger.valueOf(0);
+        sent_count = 0;
         
         readSettings();
         
@@ -205,6 +206,8 @@ public class MainActivity extends Activity implements SensorEventListener {
     	else {
     		issendingTV.setText("Sending to server is off");
     	}
+    	
+    	sentcountTV.setText("Packets sent: " + Integer.toString(sent_count));
     	
     	if (batterylevel >= 0) {
     		batteryTV.setText("Battery level: " + Integer.toString(batterylevel) + "%");
@@ -327,8 +330,17 @@ public class MainActivity extends Activity implements SensorEventListener {
 		getBatteryLevel();
 		getNeighboringCellInfo();
 		getWifiListAndScan();
+		if (is_sending) {
+			sendAllData();
+		}
 		updateAllGUIFields();
 		
+	}
+	
+	public void sendAllData(){
+		if (!packet_is_being_sent) {
+			new JSONSender().execute("\"Hello\"");
+		}
 	}
 	
 	public void getNeighboringCellInfo() {
@@ -403,23 +415,30 @@ public class MainActivity extends Activity implements SensorEventListener {
 		
 	}
 
-	public class JSONSender extends AsyncTask<String, Object, Object>{
+	public class JSONSender extends AsyncTask<String, Object, Boolean>{
 
 		@Override
-		protected Object doInBackground(String... params) {
+		protected Boolean doInBackground(String... params) {
 			String json_str = params[0];
 			if (!packet_is_being_sent) {
-				
+				publishProgress();
+				for(int i = 0; i < 1000*1000; i++);
 			}
-			return null;
+			return true;
+			//return false;
 		}
 		
+		@Override
 		protected void onProgressUpdate(Object... params) {
 			packet_is_being_sent = true;
 		}
 		
-		protected void onPostExecute(Object... params) {
+		@Override
+		protected void onPostExecute(Boolean param) {
 			packet_is_being_sent = false;
+			if(param) {
+				sent_count += 1;
+			}
 		}
 		
 	}
