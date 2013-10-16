@@ -3,11 +3,16 @@ package edu.cmu.west.mysandbox;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.app.Activity;
 import android.telephony.CellInfo;
+//import android.telephony.NeighboringCellInfo;
 import android.telephony.TelephonyManager;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.content.Intent;
 import android.content.Context;
@@ -22,6 +27,9 @@ import android.hardware.Sensor;
 
 import java.util.ArrayList;
 import java.util.List;
+import android.os.AsyncTask;
+import android.view.View;
+import android.view.View.OnClickListener;
 
 
 
@@ -30,7 +38,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 	
 	public TextView pressureTV, humidityTV, accelerometerTV, temperatureTV,
 					lightTV, longitudeTV, latitudeTV, altitudeTV, bearingTV, accuracyTV, callcountTV,
-					batteryTV, cellcountTV;
+					batteryTV, cellcountTV, wifiTV, deviceidTV, locidTV, serveruriTV, issendingTV,
+					sentcountTV;
+	public EditText deviceidED, locidED, serveruriED;
+	public Button togglesendingB, updatesettingsB;
 	Intent batteryStatus;
 	IntentFilter batteryintent;
 
@@ -42,11 +53,16 @@ public class MainActivity extends Activity implements SensorEventListener {
 	List<Float> pressurevals, humidityvals, accelerometervals, temperaturevals, lightvals;
 	List<Double> gpsvals;
 	LocationListener gpslistener;
-	Boolean gps_is_enabled;
+	Boolean gps_is_enabled, packet_is_being_sent = false, is_sending = false;
 	LocationManager locman;
 	Integer batterylevel = -1;
 	TelephonyManager telephonymanager;
 	List<CellInfo> cellinfo;
+//	List<NeighboringCellInfo> cellinfo;
+	WifiManager wifimanager;
+	List<ScanResult> wifipoints;
+	String location_id, device_id, server_uri;
+	int sent_count = 0;
 
 
 
@@ -70,6 +86,20 @@ public class MainActivity extends Activity implements SensorEventListener {
         callcountTV = (TextView)findViewById(R.id.callcountTV);
         batteryTV = (TextView)findViewById(R.id.batteryTV);
         cellcountTV = (TextView)findViewById(R.id.cellcountTV);
+        wifiTV = (TextView)findViewById(R.id.wifiTV);
+
+        deviceidTV = (TextView)findViewById(R.id.deviceidTV);
+        locidTV = (TextView)findViewById(R.id.locationidTV);
+        serveruriTV = (TextView)findViewById(R.id.serveruri2TV);
+        issendingTV = (TextView)findViewById(R.id.issendingTV);
+        sentcountTV = (TextView)findViewById(R.id.sentcountTV);
+        
+        
+        
+        
+        deviceidED = (EditText)findViewById(R.id.deviceIDeditText);
+        locidED = (EditText)findViewById(R.id.locationIDeditText);
+        serveruriED = (EditText)findViewById(R.id.serveruriED);
 
         
         
@@ -91,14 +121,90 @@ public class MainActivity extends Activity implements SensorEventListener {
         batteryStatus = context.registerReceiver(null, batteryintent);
         
         telephonymanager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        wifimanager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
+        
+        togglesendingB = (Button)findViewById(R.id.togglesendingB);
+        togglesendingB.setOnClickListener(new onSendToggleClicked());
+        
+        updatesettingsB = (Button)findViewById(R.id.updatesettingsB);
+        updatesettingsB.setOnClickListener(new onReadSettingsClicked());
 
         callcount = BigInteger.valueOf(0);
+        
+        readSettings();
+        
 
     }
  
+    public void readSettings()
+    {
+    	location_id = locidED.getText().toString();
+    	device_id = deviceidED.getText().toString();
+    	server_uri = serveruriED.getText().toString();  	
+    }
+    
+    class onSendToggleClicked implements OnClickListener {
+
+		@Override
+		public void onClick(View v) {
+			Button b = (Button)v;
+			if (is_sending) {
+				is_sending = false;
+				b.setText("Start sending");
+			}
+			else {
+				is_sending = true;
+				b.setText("Stop sending");
+			}
+		}
+    	
+    }
+
+    class onReadSettingsClicked implements OnClickListener {
+
+		@Override
+		public void onClick(View v) {
+			readSettings();
+			updateAllGUIFields();
+		}
+    	
+    }
+    
+    
+    
     public void updateAllGUIFields() {
+    	 
+    	if (locidED.hasFocus()) {
+    		locidED.clearFocus();
+    	}
+    	
+    	if (deviceidED.hasFocus()) {
+    		deviceidED.clearFocus();
+    	}
+    	
+    	if (serveruriED.hasFocus()) {
+    		serveruriED.clearFocus();
+    	}
     	
     	callcountTV.setText("Updates received: " + callcount.toString());
+    	
+    	if (device_id != null) {
+    		deviceidTV.setText("Device ID: " + device_id);
+    	}
+    	if (location_id != null) {
+    		locidTV.setText("Location ID: " + location_id);
+    	}    	
+
+    	if (server_uri != null) {
+    		serveruriTV.setText("Server URI: " + server_uri);
+    	}
+    	
+    	if(is_sending) {
+    		issendingTV.setText("Sending to server is on");
+    	}
+    	else {
+    		issendingTV.setText("Sending to server is off");
+    	}
     	
     	if (batterylevel >= 0) {
     		batteryTV.setText("Battery level: " + Integer.toString(batterylevel) + "%");
@@ -154,9 +260,19 @@ public class MainActivity extends Activity implements SensorEventListener {
     		String text = "";
     		text += "Cell count: " + cellinfo.size();
     		for (CellInfo cell: cellinfo) {
+//    		for (NeighboringCellInfo cell: cellinfo) {
     			text += "\n" + cell.toString();
     		}
     		cellcountTV.setText(text);
+    	}
+    	
+    	
+    	if (wifipoints != null) {
+    		String text = "Wifi points count: " + wifipoints.size();
+    		for (ScanResult scanres: wifipoints) {
+    			text += scanres.toString();
+    		}
+    		wifiTV.setText(text);
     	}
     	
     }
@@ -210,12 +326,14 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public void onSomethingChanged(){
 		getBatteryLevel();
 		getNeighboringCellInfo();
+		getWifiListAndScan();
 		updateAllGUIFields();
 		
 	}
 	
 	public void getNeighboringCellInfo() {
 		cellinfo = telephonymanager.getAllCellInfo();
+//		cellinfo = telephonymanager.getNeighboringCellInfo();
 	}
 	
 	public void getBatteryLevel() {
@@ -226,6 +344,12 @@ public class MainActivity extends Activity implements SensorEventListener {
 		float batteryPct = level / (float)scale;
 		
 		batterylevel = Integer.valueOf((int) (100*batteryPct));
+	}
+	
+	public void getWifiListAndScan() {
+		//new WifiGetter().execute();
+		wifimanager.startScan();
+		wifipoints = wifimanager.getScanResults();
 	}
 	
 	public class MyGPSListener implements LocationListener {
@@ -262,5 +386,42 @@ public class MainActivity extends Activity implements SensorEventListener {
 		
 		
 	}
+	
+	public class WifiGetter extends AsyncTask<Object, Object, Object> {
 
+		@Override
+		protected Object doInBackground(Object... params) {
+			publishProgress();
+			wifimanager.startScan();
+			wifipoints = wifimanager.getScanResults();
+			return null;
+		}
+		
+		protected void onProgressUpdate(Object... params){
+			wifiTV.setText("Wifi scanning has started");
+		}
+		
+	}
+
+	public class JSONSender extends AsyncTask<String, Object, Object>{
+
+		@Override
+		protected Object doInBackground(String... params) {
+			String json_str = params[0];
+			if (!packet_is_being_sent) {
+				
+			}
+			return null;
+		}
+		
+		protected void onProgressUpdate(Object... params) {
+			packet_is_being_sent = true;
+		}
+		
+		protected void onPostExecute(Object... params) {
+			packet_is_being_sent = false;
+		}
+		
+	}
+	
 }

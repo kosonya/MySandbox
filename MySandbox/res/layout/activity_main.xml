@@ -13,82 +13,148 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" >
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical" >
+	            <LinearLayout
+	                android:layout_width="match_parent"
+	                android:layout_height="match_parent"
+	                android:orientation="vertical" >
+
 
     
-    <LinearLayout
-        android:id="@+id/linearLayout1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:orientation="vertical" >
+					    <LinearLayout
+					        android:id="@+id/linearLayout1"
+					        android:layout_width="wrap_content"
+					        android:layout_height="wrap_content"
+					        android:layout_alignParentBottom="true"
+					        android:layout_alignParentLeft="true"
+					        android:layout_alignParentRight="true"
+					        android:layout_alignParentTop="true"
+					        android:orientation="vertical" >
 
-        <TextView
-            android:id="@+id/settingsTV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Settings:" />
+						        <TextView
+						            android:id="@+id/settingsTV"
+						            android:layout_width="wrap_content"
+						            android:layout_height="wrap_content"
+						            android:text="Settings:" />
         
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
-
-            <TextView
-            android:id="@+id/locationIDTV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Location ID:" />
+						        <LinearLayout
+						            android:layout_width="match_parent"
+						            android:layout_height="wrap_content" >
+							
+							            <TextView
+							            android:id="@+id/locationIDTV"
+							            android:layout_width="wrap_content"
+							            android:layout_height="wrap_content"
+							            android:text="Location ID:" />
  
-        <EditText
-            android:id="@+id/locationIDeditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10" />
+							  	        <EditText
+							            android:id="@+id/locationIDeditText"
+							            android:layout_width="match_parent"
+							            android:layout_height="wrap_content"
+							            android:ems="10"
+							            android:text="B19R1050" />
             
-        </LinearLayout>        
+						        </LinearLayout>        
 
         
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+						        <LinearLayout
+						            android:layout_width="match_parent"
+						            android:layout_height="wrap_content" >
+						
+								  	      <TextView
+								            android:id="@+id/deviceIDTV"
+								            android:layout_width="wrap_content"
+								            android:layout_height="wrap_content"
+								            android:text="Device ID:" />
+										
+										<EditText
+										    android:id="@+id/deviceIDeditText"
+										    android:layout_width="wrap_content"
+										    android:layout_height="wrap_content"
+										    android:ems="10"
+										    android:text="mob1" />
+						  	    </LinearLayout>
 
-  	      <TextView
-            android:id="@+id/deviceIDTV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Device ID:" />
-
-		        <EditText
-      	     	 android:id="@+id/locationIDeditText"
-	             android:layout_width="match_parent"
-	      	     android:layout_height="wrap_content"
-       	          android:ems="10" >
-
-                  <requestFocus />
-     	        </EditText>
   	      
-  	      
+						      <LinearLayout
+				  	          android:layout_width="wrap_content"
+				  	          android:layout_height="match_parent" >
+
+					  	          <TextView
+					  	              android:id="@+id/serveruriTV"
+					  	              android:layout_width="wrap_content"
+					  	              android:layout_height="wrap_content"
+					  	              android:text="Server URI:" />
+					
+					  	          <EditText
+					  	              android:id="@+id/serveruriED"
+					  	              android:layout_width="match_parent"
+					  	              android:layout_height="wrap_content"
+					  	              android:text="http://einstein.sv.cmu.edu/sensors:80" />
+
+   						     </LinearLayout>
+
+					        <LinearLayout
+					            android:layout_width="wrap_content"
+					            android:layout_height="wrap_content"
+					            android:orientation="horizontal" >
+		          
             
-        </LinearLayout> 
-
+							            <Button
+							            android:id="@+id/updatesettingsB"
+							            android:layout_width="wrap_content"
+							            android:layout_height="wrap_content"
+							            android:text="Update settings" />    
+							            
+									    <Button
+							                    android:id="@+id/togglesendingB"
+							                    android:layout_width="wrap_content"
+							                    android:layout_height="wrap_content"
+							                    android:text="Start sending" />
+		            
+            
+       					 </LinearLayout>
         
-        <Button
-            android:id="@+id/updatesettingsB"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Update settings" />
+
         
         <TextView
             android:id="@+id/callcountTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Here be call count" />
+
+         <TextView
+            android:id="@+id/deviceidTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Here be device ID" />
+        
+        <TextView
+            android:id="@+id/locationidTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Here be location ID" />        
+
+        
+        <TextView
+            android:id="@+id/serveruri2TV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Here be server URI" /> 
+        
+
+        <TextView
+            android:id="@+id/issendingTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Here be sending indicator" /> 
+        
+
+        <TextView
+            android:id="@+id/sentcountTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Here be sent count" /> 
+        
         
         <TextView
             android:id="@+id/batteryTV"
@@ -164,10 +230,25 @@
             android:layout_height="wrap_content"
             android:text="Here be cell count" />
 
+        
+                    <TextView
+                android:id="@+id/wifiTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/scrollView1"
+                android:layout_below="@+id/scrollView1"
+                android:text="Here be Wifi" />
+        
+        
+        
             </LinearLayout>
         
+    
+    
+    
       </LinearLayout>
         </ScrollView>
+
 
 
 </RelativeLayout>
