@@ -7,30 +7,13 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
-
-            <ScrollView
-            android:id="@+id/scrollView1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
-
-	            <LinearLayout
-	                android:layout_width="match_parent"
-	                android:layout_height="match_parent"
-	                android:orientation="vertical" >
-
-
+						        <LinearLayout
+						            android:layout_width="match_parent"
+						            android:layout_height="wrap_content"
+						            android:orientation="vertical" >
     
-					    <LinearLayout
-					        android:id="@+id/linearLayout1"
-					        android:layout_width="wrap_content"
-					        android:layout_height="wrap_content"
-					        android:layout_alignParentBottom="true"
-					        android:layout_alignParentLeft="true"
-					        android:layout_alignParentRight="true"
-					        android:layout_alignParentTop="true"
-					        android:orientation="vertical" >
-
-						        <TextView
+    
+    						        <TextView
 						            android:id="@+id/settingsTV"
 						            android:layout_width="wrap_content"
 						            android:layout_height="wrap_content"
@@ -113,6 +96,33 @@
 		            
             
        					 </LinearLayout>
+    
+    
+    
+    
+            <ScrollView
+            android:id="@+id/scrollView1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+	            <LinearLayout
+	                android:layout_width="match_parent"
+	                android:layout_height="match_parent"
+	                android:orientation="vertical" >
+
+
+    
+					    <LinearLayout
+					        android:id="@+id/linearLayout1"
+					        android:layout_width="wrap_content"
+					        android:layout_height="wrap_content"
+					        android:layout_alignParentBottom="true"
+					        android:layout_alignParentLeft="true"
+					        android:layout_alignParentRight="true"
+					        android:layout_alignParentTop="true"
+					        android:orientation="vertical" >
+
+
         
 
         
@@ -257,6 +267,7 @@
       </LinearLayout>
         </ScrollView>
 
-
+      </LinearLayout>
+            
 
 </RelativeLayout>

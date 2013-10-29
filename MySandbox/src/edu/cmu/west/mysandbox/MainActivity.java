@@ -193,7 +193,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     
     
     public void updateAllGUIFields() {
-    	 
+ /*   	 
     	if (locidED.hasFocus()) {
     		locidED.clearFocus();
     	}
@@ -205,7 +205,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     	if (serveruriED.hasFocus()) {
     		serveruriED.clearFocus();
     	}
-    	
+    	*/
     	callcountTV.setText("Updates received: " + callcount.toString());
     	
     	if (device_id != null) {
