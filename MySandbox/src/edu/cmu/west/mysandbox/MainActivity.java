@@ -17,8 +17,16 @@ import android.widget.TextView;
 import android.content.Intent;
 import android.content.Context;
 import android.content.IntentFilter;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.lang.Float;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -27,6 +35,16 @@ import android.hardware.Sensor;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpEntity;
+
 import android.os.AsyncTask;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -39,7 +57,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public TextView pressureTV, humidityTV, accelerometerTV, temperatureTV,
 					lightTV, longitudeTV, latitudeTV, altitudeTV, bearingTV, accuracyTV, callcountTV,
 					batteryTV, cellcountTV, wifiTV, deviceidTV, locidTV, serveruriTV, issendingTV,
-					sentcountTV;
+					sentcountTV, debugTV;
 	public EditText deviceidED, locidED, serveruriED;
 	public Button togglesendingB, updatesettingsB;
 	Intent batteryStatus;
@@ -93,6 +111,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         serveruriTV = (TextView)findViewById(R.id.serveruri2TV);
         issendingTV = (TextView)findViewById(R.id.issendingTV);
         sentcountTV = (TextView)findViewById(R.id.sentcountTV);
+        debugTV = (TextView)findViewById(R.id.debugTV);
         
         
         
@@ -327,9 +346,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 	}
 	
 	public void onSomethingChanged(){
-		getBatteryLevel();
-		getNeighboringCellInfo();
-		getWifiListAndScan();
+//		getBatteryLevel();
+//		getNeighboringCellInfo();
+//		getWifiListAndScan();
 		if (is_sending) {
 			sendAllData();
 		}
@@ -339,7 +358,14 @@ public class MainActivity extends Activity implements SensorEventListener {
 	
 	public void sendAllData(){
 		if (!packet_is_being_sent) {
-			new JSONSender().execute("\"Hello\"");
+			String json_str = "{\"id\": \"" + device_id + "\"";
+			long unixTime = System.currentTimeMillis();
+			json_str += ", \"timestamp\": " + Long.toString(unixTime); 
+			if (temperaturevals != null) {
+				json_str += ", \"temp\": " + Float.toString(temperaturevals.get(0));
+			}
+			json_str += "}";
+			new JSONSender().execute(json_str);
 		}
 	}
 	
@@ -417,20 +443,58 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	public class JSONSender extends AsyncTask<String, Object, Boolean>{
 
+		String debug_string = "";
 		@Override
 		protected Boolean doInBackground(String... params) {
 			String json_str = params[0];
 			if (!packet_is_being_sent) {
-				publishProgress();
-				for(int i = 0; i < 1000*1000; i++);
+				publishProgress("Sending start");
+				publishProgress("Will send: " + json_str);
+				HttpClient client = new DefaultHttpClient();
+				publishProgress("client created");
+				HttpPost postMethod = new HttpPost(server_uri);
+				postMethod.addHeader("content-type", "application/json");
+				publishProgress("httpost created");
+				try {
+					postMethod.setEntity(new StringEntity(json_str, "UTF-8"));
+					publishProgress("entity set");
+
+					HttpResponse response = client.execute(postMethod);
+					publishProgress(response.toString());
+					publishProgress(response.getStatusLine().getReasonPhrase());
+					HttpEntity entity = response.getEntity();
+					InputStream istream = entity.getContent();
+					BufferedReader rd = new BufferedReader(new InputStreamReader(istream));
+					String res = "", line;
+					while( (line = rd.readLine()) != null) {
+						
+						res += line + "\n";
+
+					}
+					istream.close();
+					publishProgress(res);
+					return true;
+
+					
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					publishProgress(e.toString());
+				}
 			}
-			return true;
-			//return false;
+				
+			
+			return false;
 		}
 		
 		@Override
 		protected void onProgressUpdate(Object... params) {
 			packet_is_being_sent = true;
+			String str = (String)params[0];
+			if (str.length() != 0) {
+				if(debug_string != "") debug_string += "\n";
+				 debug_string += str;
+			}
+			debugTV.setText(debug_string);
 		}
 		
 		@Override

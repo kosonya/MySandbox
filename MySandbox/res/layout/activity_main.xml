@@ -89,7 +89,7 @@
 					  	              android:id="@+id/serveruriED"
 					  	              android:layout_width="match_parent"
 					  	              android:layout_height="wrap_content"
-					  	              android:text="http://einstein.sv.cmu.edu/sensors:80" />
+					  	              android:text="http://209.129.244.7/sensors" />
 
    						     </LinearLayout>
 
@@ -238,7 +238,15 @@
                 android:layout_alignLeft="@+id/scrollView1"
                 android:layout_below="@+id/scrollView1"
                 android:text="Here be Wifi" />
-        
+   
+                    
+                <TextView
+                android:id="@+id/debugTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/scrollView1"
+                android:layout_below="@+id/scrollView1"
+                android:text="Here be debug info" />
         
         
             </LinearLayout>
