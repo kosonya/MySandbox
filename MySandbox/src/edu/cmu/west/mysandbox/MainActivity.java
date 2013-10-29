@@ -116,10 +116,6 @@ public class MainActivity extends Activity implements SensorEventListener {
         deviceidED = (EditText)findViewById(R.id.deviceIDeditText);
         locidED = (EditText)findViewById(R.id.locationIDeditText);
         serveruriED = (EditText)findViewById(R.id.serveruriED);
-
-        
-        
-
         
         togglesendingB = (Button)findViewById(R.id.togglesendingB);
         togglesendingB.setOnClickListener(new onSendToggleClicked());
@@ -133,8 +129,12 @@ public class MainActivity extends Activity implements SensorEventListener {
         callcount = BigInteger.valueOf(0);
         sent_count = 0;
         
-        readSettings();
         registerListeners();
+
+        
+        deviceidED.setText("mob" + telephonymanager.getDeviceId());
+        
+        readSettings();
         
 
     }
