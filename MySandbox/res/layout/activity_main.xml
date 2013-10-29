@@ -89,7 +89,7 @@
 					  	              android:id="@+id/serveruriED"
 					  	              android:layout_width="match_parent"
 					  	              android:layout_height="wrap_content"
-					  	              android:text="http://209.129.244.7/sensors" />
+					  	              android:text="http://einstein.sv.cmu.edu/sensors" />
 
    						     </LinearLayout>
 
