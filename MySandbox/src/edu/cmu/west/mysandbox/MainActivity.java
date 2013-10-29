@@ -59,7 +59,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 					batteryTV, cellcountTV, wifiTV, deviceidTV, locidTV, serveruriTV, issendingTV,
 					sentcountTV, debugTV;
 	public EditText deviceidED, locidED, serveruriED;
-	public Button togglesendingB, updatesettingsB;
+	public Button togglesendingB, updatesettingsB, togglelisteningB;
 	Intent batteryStatus;
 	IntentFilter batteryintent;
 
@@ -71,7 +71,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	List<Float> pressurevals, humidityvals, accelerometervals, temperaturevals, lightvals;
 	List<Double> gpsvals;
 	LocationListener gpslistener;
-	Boolean gps_is_enabled, packet_is_being_sent = false, is_sending = false;
+	Boolean gps_is_enabled, packet_is_being_sent = false, is_sending = false, is_listening=true;
 	LocationManager locman;
 	Integer batterylevel = -1;
 	TelephonyManager telephonymanager;
@@ -81,6 +81,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	List<ScanResult> wifipoints;
 	String location_id, device_id, server_uri;
 	int sent_count;
+	SensorEventListener _main_listener = this;
 
 
 
@@ -89,7 +90,6 @@ public class MainActivity extends Activity implements SensorEventListener {
     
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        batteryintent = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         context = getBaseContext();
         pressureTV = (TextView)findViewById(R.id.pressureTV);
         humidityTV = (TextView)findViewById(R.id.humidityTV);
@@ -112,16 +112,35 @@ public class MainActivity extends Activity implements SensorEventListener {
         issendingTV = (TextView)findViewById(R.id.issendingTV);
         sentcountTV = (TextView)findViewById(R.id.sentcountTV);
         debugTV = (TextView)findViewById(R.id.debugTV);
-        
-        
-        
-        
+
         deviceidED = (EditText)findViewById(R.id.deviceIDeditText);
         locidED = (EditText)findViewById(R.id.locationIDeditText);
         serveruriED = (EditText)findViewById(R.id.serveruriED);
 
         
         
+
+        
+        togglesendingB = (Button)findViewById(R.id.togglesendingB);
+        togglesendingB.setOnClickListener(new onSendToggleClicked());
+        
+        updatesettingsB = (Button)findViewById(R.id.updatesettingsB);
+        updatesettingsB.setOnClickListener(new onReadSettingsClicked());
+
+        togglelisteningB = (Button)findViewById(R.id.togglelisteningB);
+        togglelisteningB.setOnClickListener(new onListenToggleClicked());
+        
+        callcount = BigInteger.valueOf(0);
+        sent_count = 0;
+        
+        readSettings();
+        registerListeners();
+        
+
+    }
+ 
+    public void registerListeners() {
+        batteryintent = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         sensormanager = (SensorManager)getSystemService(SENSOR_SERVICE);
         pressureS = sensormanager.getDefaultSensor(Sensor.TYPE_PRESSURE);
         humidityS = sensormanager.getDefaultSensor(Sensor.TYPE_RELATIVE_HUMIDITY);
@@ -141,21 +160,8 @@ public class MainActivity extends Activity implements SensorEventListener {
         
         telephonymanager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         wifimanager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
-        
-        togglesendingB = (Button)findViewById(R.id.togglesendingB);
-        togglesendingB.setOnClickListener(new onSendToggleClicked());
-        
-        updatesettingsB = (Button)findViewById(R.id.updatesettingsB);
-        updatesettingsB.setOnClickListener(new onReadSettingsClicked());
-
-        callcount = BigInteger.valueOf(0);
-        sent_count = 0;
-        
-        readSettings();
-        
-
     }
- 
+    
     public void readSettings()
     {
     	location_id = locidED.getText().toString();
@@ -190,7 +196,25 @@ public class MainActivity extends Activity implements SensorEventListener {
     	
     }
     
-    
+    class onListenToggleClicked implements OnClickListener {
+
+		@Override
+		public void onClick(View v) {
+			Button b = (Button)v;
+			if (is_listening) {
+				is_listening = false;
+				b.setText("Start listening");
+				sensormanager.unregisterListener(_main_listener);
+				locman.removeUpdates(gpslistener);
+			}
+			else {
+				is_listening = true;
+				b.setText("Stop listening");
+				registerListeners();
+			}
+		}
+    	
+    }    
     
     public void updateAllGUIFields() {
  /*   	 

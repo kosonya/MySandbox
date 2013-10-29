@@ -86,14 +86,19 @@
 							            android:id="@+id/updatesettingsB"
 							            android:layout_width="wrap_content"
 							            android:layout_height="wrap_content"
-							            android:text="Update settings" />    
+							            android:text="Update\nsettings" />
+
+							            <Button
+							                android:id="@+id/togglelisteningB"
+							                android:layout_width="wrap_content"
+							                android:layout_height="wrap_content"
+							                android:text="Stop\nlistening" />
 							            
 									    <Button
 							                    android:id="@+id/togglesendingB"
 							                    android:layout_width="wrap_content"
 							                    android:layout_height="wrap_content"
-							                    android:text="Start sending" />
-		            
+							                    android:text="Start\nsending" />
             
        					 </LinearLayout>
     
