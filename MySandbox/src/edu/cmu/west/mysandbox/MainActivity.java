@@ -370,9 +370,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 	}
 	
 	public void onSomethingChanged(){
-//		getBatteryLevel();
+		getBatteryLevel();
 //		getNeighboringCellInfo();
-//		getWifiListAndScan();
+		getWifiListAndScan();
 		if (is_sending) {
 			sendAllData();
 		}
@@ -385,8 +385,21 @@ public class MainActivity extends Activity implements SensorEventListener {
 			String json_str = "{\"id\": \"" + device_id + "\"";
 			long unixTime = System.currentTimeMillis();
 			json_str += ", \"timestamp\": " + Long.toString(unixTime); 
+			json_str += ", \"location\": \"" + location_id + "\"";
 			if (temperaturevals != null) {
 				json_str += ", \"temp\": " + Float.toString(temperaturevals.get(0));
+			}
+			if (pressurevals != null) {
+				json_str += ", \"pressure\": " + Float.toString(pressurevals.get(0));
+			}
+			if (humidityvals != null) {
+				json_str += ", \"humidity\": " + Float.toString(humidityvals.get(0));
+			}
+			if (lightvals != null) {
+				json_str += ", \"light\": " + Float.toString(lightvals.get(0));
+			}
+			if (batterylevel != -1) {
+				json_str += ", \"bat\": " + Float.toString(batterylevel);
 			}
 			json_str += "}";
 			new JSONSender().execute(json_str);
