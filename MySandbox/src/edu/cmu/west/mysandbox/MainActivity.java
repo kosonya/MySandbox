@@ -316,7 +316,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     	if (wifipoints != null) {
     		String text = "Wifi points count: " + wifipoints.size();
     		for (ScanResult scanres: wifipoints) {
-    			text += scanres.toString();
+    			text += "\n" + scanres.BSSID + "; " + scanres.SSID + "; " + scanres.frequency + "; " + scanres.level;
     		}
     		wifiTV.setText(text);
     	}
