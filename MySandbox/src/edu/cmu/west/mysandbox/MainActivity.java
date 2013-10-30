@@ -71,7 +71,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	List<Float> pressurevals, humidityvals, accelerometervals, temperaturevals, lightvals;
 	List<Double> gpsvals;
 	LocationListener gpslistener;
-	Boolean gps_is_enabled, packet_is_being_sent = false, is_sending = false, is_listening=true;
+	Boolean gps_is_enabled, packet_is_being_sent = false, is_sending = false, is_listening=true, bundling = false;
 	LocationManager locman;
 	Integer batterylevel = -1;
 	TelephonyManager telephonymanager;
@@ -80,8 +80,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 	WifiManager wifimanager;
 	List<ScanResult> wifipoints;
 	String location_id, device_id, server_uri;
-	int sent_count;
+	int sent_count, maximum_bundle_size = 50, bundle_size = 0;
 	SensorEventListener _main_listener = this;
+	String json_bundle = "";
 
 
 
@@ -380,41 +381,84 @@ public class MainActivity extends Activity implements SensorEventListener {
 		
 	}
 	
+	public String generateJSON() {
+		String json_str = "{\"id\": \"" + device_id + "\"";
+		long unixTime = System.currentTimeMillis();
+		json_str += ", \"timestamp\": " + Long.toString(unixTime); 
+		json_str += ", \"location\": \"" + location_id + "\"";
+		if (temperaturevals != null) {
+			json_str += ", \"temp\": " + Float.toString(temperaturevals.get(0));
+		}
+		if (pressurevals != null) {
+			json_str += ", \"pressure\": " + Float.toString(pressurevals.get(0));
+		}
+		if (humidityvals != null) {
+			json_str += ", \"humidity\": " + Float.toString(humidityvals.get(0));
+		}
+		if (lightvals != null) {
+			json_str += ", \"light\": " + Float.toString(lightvals.get(0));
+		}
+		if (batterylevel != -1) {
+			json_str += ", \"bat\": " + Float.toString(batterylevel);
+		}
+		if (wifipoints != null) {
+			for (ScanResult scanres: wifipoints) {
+				json_str += ", \"wifiBSSID" + scanres.BSSID + "\": " + Integer.toString(scanres.level);
+			}
+		}
+    	if (gpsvals != null) {
+    		json_str += ", \"GPSLat\": " + Double.toString(gpsvals.get(0));
+    		json_str += ", \"GPSLon\": " + Double.toString(gpsvals.get(1));
+    		json_str += ", \"GPSAlt\": " + Double.toString(gpsvals.get(2));
+    	}
+		
+		json_str += "}";
+		return json_str;
+	}
+	
 	public void sendAllData(){
-		if (!packet_is_being_sent) {
-			String json_str = "{\"id\": \"" + device_id + "\"";
-			long unixTime = System.currentTimeMillis();
-			json_str += ", \"timestamp\": " + Long.toString(unixTime); 
-			json_str += ", \"location\": \"" + location_id + "\"";
-			if (temperaturevals != null) {
-				json_str += ", \"temp\": " + Float.toString(temperaturevals.get(0));
-			}
-			if (pressurevals != null) {
-				json_str += ", \"pressure\": " + Float.toString(pressurevals.get(0));
-			}
-			if (humidityvals != null) {
-				json_str += ", \"humidity\": " + Float.toString(humidityvals.get(0));
-			}
-			if (lightvals != null) {
-				json_str += ", \"light\": " + Float.toString(lightvals.get(0));
-			}
-			if (batterylevel != -1) {
-				json_str += ", \"bat\": " + Float.toString(batterylevel);
-			}
-			if (wifipoints != null) {
-				for (ScanResult scanres: wifipoints) {
-					json_str += ", \"wifiBSSID" + scanres.BSSID + "\": " + Integer.toString(scanres.level);
+		if (bundling) {
+			if(packet_is_being_sent) { //Possibly packing data
+				if (bundle_size < maximum_bundle_size) {
+					if (json_bundle == "") {
+						json_bundle = "[" + generateJSON();
+					}
+					else {
+						json_bundle += ", " + generateJSON();
+					}
+					bundle_size += 1;
+				}
+				else {
+					; //Nothing, we'll lose this data
 				}
 			}
-	    	if (gpsvals != null) {
-	    		json_str += ", \"GPSLat\": " + Double.toString(gpsvals.get(0));
-	    		json_str += ", \"GPSLon\": " + Double.toString(gpsvals.get(1));
-	    		json_str += ", \"GPSAlt\": " + Double.toString(gpsvals.get(2));
-	    	}
+			else {
+				String json_str = "";
+				if (bundle_size < maximum_bundle_size) {
+					if (json_bundle == "") {
+						json_str = "[" + generateJSON() + "]";
+					}
+					else {
+						json_str = json_bundle + ", " + generateJSON() + "]";
+					}
+				}
+				else {
+					//Nothing, we'll lose this data
+					json_str = json_bundle + "]";
+				}
+				json_bundle = "";
+				bundle_size = 0;
+				new JSONSender().execute(json_str);
+			}
 			
-			json_str += "}";
-			new JSONSender().execute(json_str);
 		}
+		else {
+			if (!packet_is_being_sent) {
+				String json_str = generateJSON();
+				new JSONSender().execute(json_str);
+			}		
+		}
+
 	}
 	
 	public void getNeighboringCellInfo() {
