@@ -401,6 +401,17 @@ public class MainActivity extends Activity implements SensorEventListener {
 			if (batterylevel != -1) {
 				json_str += ", \"bat\": " + Float.toString(batterylevel);
 			}
+			if (wifipoints != null) {
+				for (ScanResult scanres: wifipoints) {
+					json_str += ", \"wifiBSSID" + scanres.BSSID + "\": " + Integer.toString(scanres.level);
+				}
+			}
+	    	if (gpsvals != null) {
+	    		json_str += ", \"GPSLat\": " + Double.toString(gpsvals.get(0));
+	    		json_str += ", \"GPSLon\": " + Double.toString(gpsvals.get(1));
+	    		json_str += ", \"GPSAlt\": " + Double.toString(gpsvals.get(2));
+	    	}
+			
 			json_str += "}";
 			new JSONSender().execute(json_str);
 		}
