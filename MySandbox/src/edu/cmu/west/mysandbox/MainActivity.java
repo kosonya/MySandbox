@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.content.Intent;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.widget.ToggleButton;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -56,10 +57,11 @@ public class MainActivity extends Activity implements SensorEventListener {
 	
 	public TextView pressureTV, humidityTV, accelerometerTV, temperatureTV,
 					lightTV, longitudeTV, latitudeTV, altitudeTV, bearingTV, accuracyTV, callcountTV,
-					batteryTV, cellcountTV, wifiTV, deviceidTV, locidTV, serveruriTV, issendingTV,
+					batteryTV, cellcountTV, wifiTV, deviceidTV, locidTV, serveruriTV, issendingTV, bundlingTV,
 					sentcountTV, debugTV;
-	public EditText deviceidED, locidED, serveruriED;
+	public EditText deviceidED, locidED, serveruriED, bundlesizeED;
 	public Button togglesendingB, updatesettingsB, togglelisteningB;
+	public ToggleButton togglebundlingTB;
 	Intent batteryStatus;
 	IntentFilter batteryintent;
 
@@ -111,12 +113,15 @@ public class MainActivity extends Activity implements SensorEventListener {
         locidTV = (TextView)findViewById(R.id.locationidTV);
         serveruriTV = (TextView)findViewById(R.id.serveruri2TV);
         issendingTV = (TextView)findViewById(R.id.issendingTV);
+        bundlingTV = (TextView)findViewById(R.id.bundlingTV);
         sentcountTV = (TextView)findViewById(R.id.sentcountTV);
         debugTV = (TextView)findViewById(R.id.debugTV);
 
         deviceidED = (EditText)findViewById(R.id.deviceIDeditText);
         locidED = (EditText)findViewById(R.id.locationIDeditText);
         serveruriED = (EditText)findViewById(R.id.serveruriED);
+        bundlesizeED = (EditText)findViewById(R.id.bundlesizeED);
+
         
         togglesendingB = (Button)findViewById(R.id.togglesendingB);
         togglesendingB.setOnClickListener(new onSendToggleClicked());
@@ -126,6 +131,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 
         togglelisteningB = (Button)findViewById(R.id.togglelisteningB);
         togglelisteningB.setOnClickListener(new onListenToggleClicked());
+
+        togglebundlingTB = (ToggleButton)findViewById(R.id.togglebundlingTB);
         
         callcount = BigInteger.valueOf(0);
         sent_count = 0;
@@ -167,7 +174,9 @@ public class MainActivity extends Activity implements SensorEventListener {
     {
     	location_id = locidED.getText().toString();
     	device_id = deviceidED.getText().toString();
-    	server_uri = serveruriED.getText().toString();  	
+    	server_uri = serveruriED.getText().toString();
+    	maximum_bundle_size = Integer.parseInt(bundlesizeED.getText().toString());
+    	bundling = togglebundlingTB.isChecked();
     }
     
     class onSendToggleClicked implements OnClickListener {
@@ -232,6 +241,13 @@ public class MainActivity extends Activity implements SensorEventListener {
     	}
     	*/
     	callcountTV.setText("Updates received: " + callcount.toString());
+    	
+    	if (bundling) {
+    		bundlingTV.setText("Bundling is on; max size: " + Integer.toString(maximum_bundle_size) + "; current size: " + Integer.toString(bundle_size));
+    	}
+    	else {
+    		bundlingTV.setText("Bundling is off");
+    	}
     	
     	if (device_id != null) {
     		deviceidTV.setText("Device ID: " + device_id);
