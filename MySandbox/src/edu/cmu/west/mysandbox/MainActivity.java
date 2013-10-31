@@ -557,7 +557,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 			String json_str = params[0];
 			if (!packet_is_being_sent) {
 				publishProgress("Sending start");
-				publishProgress("Will send: " + json_str);
+				//publishProgress("Will send: " + json_str);
 				HttpClient client = new DefaultHttpClient();
 				publishProgress("client created");
 				HttpPost postMethod = new HttpPost(server_uri);
