@@ -49,6 +49,7 @@ import org.apache.http.HttpEntity;
 import android.os.AsyncTask;
 import android.view.View;
 import android.view.View.OnClickListener;
+import java.util.concurrent.Semaphore;
 
 
 
@@ -58,10 +59,12 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public TextView pressureTV, humidityTV, accelerometerTV, temperatureTV,
 					lightTV, longitudeTV, latitudeTV, altitudeTV, bearingTV, accuracyTV, callcountTV,
 					batteryTV, cellcountTV, wifiTV, deviceidTV, locidTV, serveruriTV, issendingTV, bundlingTV,
-					sentcountTV, debugTV;
-	public EditText deviceidED, locidED, serveruriED, bundlesizeED;
+					sentcountTV, debugTV, postsTV;
+	public EditText deviceidED, locidED, serveruriED, bundlesizeED, httprequestsED;
 	public Button togglesendingB, updatesettingsB, togglelisteningB;
 	public ToggleButton togglebundlingTB;
+	public  Semaphore task_semaphore;
+
 	Intent batteryStatus;
 	IntentFilter batteryintent;
 
@@ -82,9 +85,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 	WifiManager wifimanager;
 	List<ScanResult> wifipoints;
 	String location_id, device_id, server_uri;
-	int sent_count, maximum_bundle_size = 50, bundle_size = 0;
+	int sent_count, maximum_bundle_size = 50, bundle_size = 0, maximum_parallel_posts = 0, parallel_posts;
 	SensorEventListener _main_listener = this;
-	String json_bundle = "";
+	String json_bundle = "", debug_str = "";
 
 
 
@@ -116,11 +119,14 @@ public class MainActivity extends Activity implements SensorEventListener {
         bundlingTV = (TextView)findViewById(R.id.bundlingTV);
         sentcountTV = (TextView)findViewById(R.id.sentcountTV);
         debugTV = (TextView)findViewById(R.id.debugTV);
+        postsTV = (TextView)findViewById(R.id.postsTV);
 
+        
         deviceidED = (EditText)findViewById(R.id.deviceIDeditText);
         locidED = (EditText)findViewById(R.id.locationIDeditText);
         serveruriED = (EditText)findViewById(R.id.serveruriED);
         bundlesizeED = (EditText)findViewById(R.id.bundlesizeED);
+        httprequestsED = (EditText)findViewById(R.id.httprequestsED);
 
         
         togglesendingB = (Button)findViewById(R.id.togglesendingB);
@@ -136,7 +142,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         
         callcount = BigInteger.valueOf(0);
         sent_count = 0;
-        
+        parallel_posts = 0;
         registerListeners();
 
         
@@ -176,7 +182,12 @@ public class MainActivity extends Activity implements SensorEventListener {
     	device_id = deviceidED.getText().toString();
     	server_uri = serveruriED.getText().toString();
     	maximum_bundle_size = Integer.parseInt(bundlesizeED.getText().toString());
+    	int tmp = maximum_parallel_posts;
+    	maximum_parallel_posts = Integer.parseInt(httprequestsED.getText().toString());
     	bundling = togglebundlingTB.isChecked();
+    	if (tmp != maximum_parallel_posts) {
+    		task_semaphore = new Semaphore(maximum_parallel_posts, true);
+    	}
     }
     
     class onSendToggleClicked implements OnClickListener {
@@ -241,6 +252,8 @@ public class MainActivity extends Activity implements SensorEventListener {
     	}
     	*/
     	callcountTV.setText("Updates received: " + callcount.toString());
+    	
+    	postsTV.setText("POSTS pending: " + Integer.toString(maximum_parallel_posts - task_semaphore.availablePermits()) + "; maximum: " + Integer.toString(maximum_parallel_posts));
     	
     	if (bundling) {
     		bundlingTV.setText("Bundling is on; max size: " + Integer.toString(maximum_bundle_size) + "; current size: " + Integer.toString(bundle_size));
@@ -434,7 +447,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	
 	public void sendAllData(){
 		if (bundling) {
-			if(packet_is_being_sent) { //Possibly packing data
+			if(task_semaphore.availablePermits() <= 0) { //Possibly packing data
 				if (bundle_size < maximum_bundle_size) {
 					if (json_bundle == "") {
 						json_bundle = "[" + generateJSON();
@@ -464,13 +477,18 @@ public class MainActivity extends Activity implements SensorEventListener {
 				}
 				json_bundle = "";
 				bundle_size = 0;
+				task_semaphore.tryAcquire();
 				new JSONSender().execute(json_str);
 			}
 			
 		}
 		else {
-			if (!packet_is_being_sent) {
+			if (task_semaphore.availablePermits() > 0) {
+		//	if(true) {
+				//debug_str += "execution started\n";
+				//debugTV.setText(debug_str);
 				String json_str = generateJSON();
+				task_semaphore.tryAcquire();
 				new JSONSender().execute(json_str);
 			}		
 		}
@@ -552,11 +570,12 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public class JSONSender extends AsyncTask<String, Object, Boolean>{
 
 		String debug_string = "";
+		boolean sending_started = false;
 		@Override
 		protected Boolean doInBackground(String... params) {
-			String json_str = params[0];
-			if (!packet_is_being_sent) {
+			if (true) {
 				publishProgress("Sending start");
+				String json_str = params[0];
 				//publishProgress("Will send: " + json_str);
 				HttpClient client = new DefaultHttpClient();
 				publishProgress("client created");
@@ -598,19 +617,36 @@ public class MainActivity extends Activity implements SensorEventListener {
 		protected void onProgressUpdate(Object... params) {
 			packet_is_being_sent = true;
 			String str = (String)params[0];
+//			debug_str += "has is strated? I got " + str + " ";
+			debugTV.setText(Integer.toString(task_semaphore.availablePermits()));
+			if (str == "Sending start") {
+				debug_str += "It has started\n ";
+				debug_str += Integer.toString(parallel_posts) + " posts before\n";
+				parallel_posts += 1;
+				debug_str += Integer.toString(parallel_posts) + " posts after\n";
+				debugTV.setText(Integer.toString(task_semaphore.availablePermits()));
+				sending_started = true;
+			}
 			if (str.length() != 0) {
 				if(debug_string != "") debug_string += "\n";
 				 debug_string += str;
 			}
-			debugTV.setText(debug_string);
+			//debugTV.setText(debug_string);
 		}
 		
 		@Override
 		protected void onPostExecute(Boolean param) {
 			packet_is_being_sent = false;
+			task_semaphore.release();
+			debug_str += "it has stopped\n";
+			debugTV.setText(Integer.toString(task_semaphore.availablePermits()));
+			if (sending_started) {
+				parallel_posts -= 1;
+			}
 			if(param) {
 				sent_count += 1;
 			}
+			updateAllGUIFields();
 		}
 		
 	}

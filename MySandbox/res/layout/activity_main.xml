@@ -71,7 +71,23 @@
 
    						     </LinearLayout>
 
+						      <LinearLayout
+				  	          android:layout_width="wrap_content"
+				  	          android:layout_height="match_parent" >
 
+					  	          <TextView
+					  	              android:id="@+id/httprequestsTV"
+					  	              android:layout_width="wrap_content"
+					  	              android:layout_height="wrap_content"
+					  	              android:text="Parallel HTTP requests:" />
+					
+					  	          <EditText
+					  	              android:id="@+id/httprequestsED"
+					  	              android:layout_width="match_parent"
+					  	              android:layout_height="wrap_content"
+					  	              android:text="1" />
+
+   						     </LinearLayout>
 
 						      <LinearLayout
 				  	          android:layout_width="wrap_content"
@@ -193,6 +209,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Here be bundling indicator" /> 
+
+        <TextView
+            android:id="@+id/postsTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Here be posts indicator" /> 
         
 
         <TextView
